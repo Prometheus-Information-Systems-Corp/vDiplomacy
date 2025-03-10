@@ -1,0 +1,43 @@
+version: "3.9"
+services:
+  mysql:
+    ports:
+      - "${VDIP_SQL_PORT}:3306"
+    build: "./build/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_HOST: "${MYSQL_HOST}"
+    image: gitlab.prometheus.systems:5050/prometheus-information-systems-corp/docker-vdiplomacy:sql
+    container_name: vdiplomacy-mysql
+    volumes:
+      - dbData:/var/lib/mysql
+    networks:
+      - local-vdip 
+  php-apache:
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_HOST: "${MYSQL_HOST_PHP}"
+      VDIP_SALT: "${VDIP_SALT}"
+      VDIP_SECRET: "${VDIP_SECRET}"
+      VDIP_GMSECRET: "${VDIP_SECRET}"
+    image: gitlab.prometheus.systems:5050/prometheus-information-systems-corp/docker-vdiplomacy:php
+    container_name: vdiplomacy-php
+    ports:
+      - "${VDIP_PORT}:80"
+    build: "./build/php"
+    volumes:
+      - app:/var/www/html
+    networks:
+      - local-vdip
+volumes:
+  app:
+  dbData:
+
+networks:
+  local-vdip:
